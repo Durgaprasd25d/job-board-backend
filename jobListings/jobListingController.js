@@ -1,11 +1,14 @@
-// controllers/jobController.js
-
 import * as jobListingService from "./jobListingService.js";
 import mongoose from 'mongoose'
+
+
 export const createJobListing = async (req, res, next) => {
   try {
     const { role, _id: userId } = req.user;
     const { title } = req.body;
+    console.log("User Role:", role);
+    console.log("User ID:", userId);
+    console.log("Job Title:", title);
 
     if (role !== "admin") {
       const error = new Error("Access denied.");
@@ -13,15 +16,9 @@ export const createJobListing = async (req, res, next) => {
       throw error;
     }
 
-    // Check if the job title already exists for the user
-    const titleExists = await jobListingService.jobTitleExistsForUser(
-      title,
-      userId
-    );
+    const titleExists = await jobListingService.jobTitleExistsForUser(title, userId);
     if (titleExists) {
-      const error = new Error(
-        "You have already created a job listing with this title."
-      );
+      const error = new Error("You have already created a job listing with this title.");
       error.statusCode = 400;
       throw error;
     }
@@ -30,14 +27,19 @@ export const createJobListing = async (req, res, next) => {
     const jobListing = await jobListingService.createJobListing(jobData);
     res.status(201).json(jobListing);
   } catch (error) {
+    console.error("Error creating job listing:", error);
     next(error);
   }
 };
+
 export const getJobListings = async (req, res, next) => {
   try {
-    const jobListings = await jobListingService.getJobListings();
+    const filters = req.query;
+    console.log("Filters:", filters);
+    const jobListings = await jobListingService.getJobListings(filters);
     res.status(200).json(jobListings);
   } catch (error) {
+    console.error("Error getting job listings:", error);
     next(error);
   }
 };
