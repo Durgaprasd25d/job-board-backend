@@ -1,14 +1,15 @@
-// middlewares/authMiddleware.js
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import mongoose from 'mongoose';
 
-export default async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     const authHeader = req.get('Authorization');
     if (!authHeader) {
         const error = new Error('Not authenticated.');
         error.statusCode = 401;
         return next(error);
     }
+
     const token = authHeader.split(' ')[1];
     let decodedToken;
     try {
@@ -17,7 +18,8 @@ export default async (req, res, next) => {
         err.statusCode = 500;
         return next(err);
     }
-    if (!decodedToken) {
+
+    if (!decodedToken || !decodedToken.userId) {
         const error = new Error('Not authenticated.');
         error.statusCode = 401;
         return next(error);
@@ -31,12 +33,14 @@ export default async (req, res, next) => {
             return next(error);
         }
 
+        req.user = user; // Attach user object to req for future use if needed
+        req.userId = decodedToken.userId; // Set userId from decoded token
 
-        req.user = user;
-        req.userId = user._id; // Attach the user ID to the request
         next();
     } catch (err) {
         err.statusCode = 500;
         return next(err);
     }
 };
+
+export default authMiddleware;

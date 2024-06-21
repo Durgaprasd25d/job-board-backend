@@ -1,5 +1,5 @@
 import JobApplication from "../models/JobApplication.js";
-
+import JobListing from "../models/JobListing.js";
 export const createJobApplication = async (applicationData) => {
   const jobApplication = new JobApplication(applicationData);
   await jobApplication.save();
@@ -37,4 +37,12 @@ export const updateJobApplicationService = async (appId, updateFields) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const getAllJobApplications = async () => {
+  return await JobApplication.find();
+};
+
+export const getUserJobApplications = async (userId) => {
+  return await JobApplication.find({ applicantId: userId });
 };

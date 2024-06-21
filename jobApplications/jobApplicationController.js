@@ -1,5 +1,3 @@
-// controllers/jobApplicationController.js
-
 import * as jobApplicationService from "./jobApplicationService.js";
 import JobApplication from "../models/JobApplication.js"; // Import User model
 import JobListing from "../models/JobListing.js"; // Import JobListing model
@@ -140,3 +138,72 @@ export const updateJobApplication = async (req, res, next) => {
   }
 };
 
+
+export const getAllJobApplications = async (req, res, next) => {
+  try {
+    if (!req.user || req.user.role !== "admin") {
+      const error = new Error(
+        "Access denied. Only admins can access this route."
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+    const applications = await JobApplication.find()
+      .populate('applicantId', 'name email')
+      .populate('jobId', 'title'); // Populate the jobId field to get the job title
+
+    const formattedApplications = applications.map(apply => ({
+      applicationId: apply._id,
+      jobId: apply.jobId ? apply.jobId._id : null,
+      jobTitle: apply.jobId ? apply.jobId.title : 'Job title not available',
+      applicantId: apply.applicantId ? {
+        userId: apply.applicantId._id,
+        name: apply.applicantId.name,
+        email: apply.applicantId.email,
+      } : {
+        userId: null,
+        name: 'User not available',
+        email: 'Email not available'
+      },
+      coverLetter: apply.coverLetter,
+      resume: apply.resume,
+      status: apply.status,
+      createdAt: apply.createdAt,
+      updatedAt: apply.updatedAt,
+    }));
+
+    res.status(200).json(formattedApplications);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserJobApplications = async (req, res, next) => {
+  try {
+      const userId = req.userId; // Extracted user ID from auth middleware
+      console.log('Controller userId:', userId); // Debugging log
+
+      const jobApplications = await JobApplication.find({ applicantId: userId })
+          .populate('jobId', 'title company') // Populate job listing details
+          .select('jobId coverLetter resume status createdAt updatedAt');
+      console.log('Job Applications:', jobApplications);
+
+      const formattedApplications = jobApplications.map((application) => ({
+          applicationId: application._id,
+          jobId: application.jobId._id,
+          jobTitle: application.jobId.title,
+          company: application.jobId.company,
+          coverLetter: application.coverLetter,
+          resume: application.resume,
+          status: application.status,
+          createdAt: application.createdAt,
+          updatedAt: application.updatedAt,
+      }));
+
+      console.log('Formatted Applications:', formattedApplications);
+      res.status(200).json(formattedApplications);
+  } catch (error) {
+      console.error('Error occurred:', error);
+      next(error);
+  }
+};
