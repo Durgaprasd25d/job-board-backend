@@ -1,5 +1,7 @@
 import JobApplication from "../models/JobApplication.js";
 import JobListing from "../models/JobListing.js";
+import nodemailer from 'nodemailer'
+
 export const createJobApplication = async (applicationData) => {
   const jobApplication = new JobApplication(applicationData);
   await jobApplication.save();
@@ -46,3 +48,39 @@ export const getAllJobApplications = async () => {
 export const getUserJobApplications = async (userId) => {
   return await JobApplication.find({ applicantId: userId });
 };
+
+// TODO : [I will integrate the nodemailer to it , for now its under dev mode and also having some errors likes credentials plan ]
+
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL,
+//     pass: process.env.EMAIL_PASSWORD,
+//   },
+//   tls: {
+//     rejectUnauthorized: false, // This line might be needed, but use with caution
+//   },
+// });
+
+// export const sendStatusChangeEmail = async (applicantEmail, newStatus) => {
+//   const mailOptions = {
+//     from: process.env.EMAIL,
+//     to: applicantEmail,
+//     subject: 'Status Update',
+//     text: `Dear Applicant,
+
+// Your application status has been updated to: ${newStatus}.
+
+// Thank you,
+// Your Company Name`,
+//   };
+
+//   try {
+//     const info = await transporter.sendMail(mailOptions);
+//     console.log('Email sent: ' + info.response);
+//     return info;
+//   } catch (error) {
+//     console.error('Error sending email:', error);
+//     throw error;
+//   }
+// };

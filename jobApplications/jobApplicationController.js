@@ -207,3 +207,33 @@ export const getUserJobApplications = async (req, res, next) => {
       next(error);
   }
 };
+
+// export const updateApplicationStatus = async (req, res, next) => {
+//   try {
+//     if (!req.user || req.user.role !== 'admin') {
+//       const error = new Error('Access denied. Only admins can access this route.');
+//       error.statusCode = 403;
+//       throw error;
+//     }
+
+//     const { applicationId } = req.params;
+//     const { status } = req.body;
+
+//     if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+//       const error = new Error('Invalid application ID format.');
+//       error.statusCode = 400;
+//       throw error;
+//     }
+
+//     const updatedApplication = await jobApplicationService.updateJobApplicationService(applicationId, { status });
+    
+//     // Send email notification
+//     jobApplicationService.sendStatusChangeEmail(updatedApplication.applicantEmail, status);
+
+//     res.status(200).json(updatedApplication);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+
